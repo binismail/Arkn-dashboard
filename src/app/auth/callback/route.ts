@@ -36,7 +36,7 @@ export async function GET(request: Request) {
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}${next}`);
     }
   }
 
@@ -47,9 +47,9 @@ export async function GET(request: Request) {
       type: type as any,
     });
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}${next}`);
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=Could not authenticate session`);
+  return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/login?error=Could not authenticate session`);
 }
