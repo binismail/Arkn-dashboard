@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: recoveryError?.message || "Failed to generate recovery link." }, { status: 400 });
     }
 
-    const resetLink = `${origin}/auth/callback?token_hash=${recoveryData.properties.hashed_token}&type=recovery&next=/reset-password`;
+    const resetLink = `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback?token_hash=${recoveryData.properties.hashed_token}&type=recovery&next=/reset-password`;
 
     // Send the beautifully designed recovery email via Resend
     try {

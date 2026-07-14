@@ -60,7 +60,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: linkError?.message || "Failed to generate verification link." }, { status: 400 });
     }
 
-    const verificationLink = `${origin}/auth/callback?token_hash=${linkData.properties.hashed_token}&type=signup&next=/onboarding/create-org`;
+    const verificationLink = `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback?token_hash=${linkData.properties.hashed_token}&type=signup&next=/onboarding/create-org`;
 
     // Send the custom verification email via Resend
     try {

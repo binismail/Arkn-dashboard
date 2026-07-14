@@ -111,7 +111,7 @@ export async function POST(request: Request) {
         continue;
       }
 
-      const inviteLink = `${origin}/auth/callback?token_hash=${inviteLinkData.properties.hashed_token}&type=invite&next=/reset-password`;
+      const inviteLink = `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback?token_hash=${inviteLinkData.properties.hashed_token}&type=invite&next=/reset-password`;
 
       // Send the beautifully designed custom HTML email via Resend
       try {
