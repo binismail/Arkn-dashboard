@@ -94,6 +94,10 @@ export default function DashboardOverviewPage() {
           if (deviceIds.length > 0) {
             telQuery = telQuery.in("device_id", deviceIds);
             countQuery = countQuery.in("device_id", deviceIds);
+          } else {
+            // No devices — force empty result instead of showing org-wide data
+            telQuery = telQuery.is("device_id", null);
+            countQuery = countQuery.is("device_id", null);
           }
         }
 

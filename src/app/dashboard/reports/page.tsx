@@ -72,6 +72,9 @@ export default function ReportsPage() {
           const deviceIds = (myDevices || []).map((d) => d.id);
           if (deviceIds.length > 0) {
             telQuery = telQuery.in("device_id", deviceIds);
+          } else {
+            // No devices — force empty result instead of showing org-wide data
+            telQuery = telQuery.is("device_id", null);
           }
         }
 
