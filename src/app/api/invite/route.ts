@@ -99,16 +99,32 @@ export async function POST(request: Request) {
         continue;
       }
 
-      // Ensure the user exists in Supabase Auth without creating a duplicate
-      // Using `type=signup` instead of `type=invite` because `type=invite`
-      // always creates a brand-new auth user, even if one already exists for
-      // this email. `type=signup` signs in existing users instead of duplicating them.
+      // Generate an invite link. Two auth types depending on whether the
+      // user already has an account:
+      //   - `type=signup`   for new users (creates the account on verify)
+      //   - `type=recovery` for existing users (signs them in, no duplicate)
+      // We try signup first, and fall back to recovery if the user already
+      // exists. Both redirect to /reset-password which handles the invite
+      // acceptance.
       const tempPassword = crypto.randomUUID();
-      const { data: inviteLinkData, error: inviteLinkError } = await supabaseAdmin.auth.admin.generateLink({
+      let inviteType: "signup" | "recovery" = "signup";
+      let { data: inviteLinkData, error: inviteLinkError } = await supabaseAdmin.auth.admin.generateLink({
         type: "signup",
         email: trimmedEmail,
         password: tempPassword,
       });
+
+      // If user already exists, Supabase rejects `type=signup` — fall back to `type=recovery`
+      if (inviteLinkError?.message?.toLowerCase().includes("already been registered")) {
+        console.log(`User ${trimmedEmail} already registered, falling back to recovery link.`);
+        const recovery = await supabaseAdmin.auth.admin.generateLink({
+          type: "recovery",
+          email: trimmedEmail,
+        });
+        inviteLinkData = recovery.data;
+        inviteLinkError = recovery.error;
+        inviteType = "recovery";
+      }
 
       if (inviteLinkError || !inviteLinkData?.properties?.hashed_token) {
         console.error(`Supabase Auth Admin link generation failed for ${trimmedEmail}:`, inviteLinkError?.message);
@@ -116,7 +132,7 @@ export async function POST(request: Request) {
         continue;
       }
 
-      const inviteLink = `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback?token_hash=${inviteLinkData.properties.hashed_token}&type=signup&next=/reset-password`;
+      const inviteLink = `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback?token_hash=${inviteLinkData.properties.hashed_token}&type=${inviteType}&next=/reset-password`;
 
       // Send the beautifully designed custom HTML email via Resend
       try {
