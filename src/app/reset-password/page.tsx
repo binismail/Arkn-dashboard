@@ -130,10 +130,11 @@ export default function ResetPasswordPage() {
             }
 
             // Mark invitation accepted
-            await supabase
-              .from("invitations")
-              .update({ status: "accepted" })
-              .eq("id", invite.id);
+            await fetch("/api/accept-invite", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ invitationId: invite.id }),
+            });
           }
         }
 

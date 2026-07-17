@@ -62,10 +62,11 @@ export default function CreateOrgPage() {
         }
 
         // Mark the invitation as accepted
-        await supabase
-          .from("invitations")
-          .update({ status: "accepted" })
-          .eq("id", invite.id);
+        await fetch("/api/accept-invite", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ invitationId: invite.id }),
+        });
 
         // Redirect directly to dashboard
         router.push("/dashboard");
