@@ -49,10 +49,10 @@ export default function MembersPage() {
         if (!user) return;
         setCurrentUser(user);
 
-        // Fetch memberships
+        // Fetch memberships (includes role check)
         const { data: membership, error: memError } = await supabase
           .from("memberships")
-          .select("organization_id")
+          .select("organization_id, role")
           .eq("user_id", user.id)
           .maybeSingle();
 
@@ -60,6 +60,13 @@ export default function MembersPage() {
           setPageLoading(false);
           return;
         }
+
+        // Route guard: members cannot access this page
+        if (membership.role === "member") {
+          window.location.href = "/dashboard";
+          return;
+        }
+
         setOrgId(membership.organization_id);
 
         // Fetch memberships list

@@ -32,6 +32,7 @@ export default function DashboardOverviewPage() {
   });
   const [platforms, setPlatforms] = useState<PlatformShare[]>([]);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [userRole, setUserRole] = useState<string>("member");
 
   useEffect(() => {
     document.title = "ARKN • Dashboard";
@@ -53,7 +54,8 @@ export default function DashboardOverviewPage() {
           return;
         }
         const orgId = membership.organization_id;
-        const userRole = membership.role || "member";
+        const role = membership.role || "member";
+        setUserRole(role);
 
         // Fetch org profile
         const { data: orgData } = await supabase
@@ -81,7 +83,7 @@ export default function DashboardOverviewPage() {
         let telQuery = supabase.from("telemetry").select("pii_counts, platform, event_at, devices(device_name, user_id)").eq("organization_id", orgId);
         let countQuery = supabase.from("telemetry").select("*", { count: "exact", head: true }).eq("organization_id", orgId);
 
-        if (userRole === "member") {
+        if (role === "member") {
           const { data: myDevices } = await supabase
             .from("devices")
             .select("id")
@@ -101,10 +103,13 @@ export default function DashboardOverviewPage() {
         }
 
         // Fetch totals
-        let membersQuery = supabase
-          .from("memberships")
-          .select("*", { count: "exact", head: true })
-          .eq("organization_id", orgId);
+        let membersQuery: any = null;
+        if (role !== "member") {
+          membersQuery = supabase
+            .from("memberships")
+            .select("*", { count: "exact", head: true })
+            .eq("organization_id", orgId);
+        }
 
         let devicesQuery = supabase
           .from("devices")
@@ -112,21 +117,20 @@ export default function DashboardOverviewPage() {
           .eq("organization_id", orgId);
 
         // Members see their own device count, not org-wide
-        if (userRole === "member") {
+        if (role === "member") {
           devicesQuery = devicesQuery.eq("user_id", user.id);
         }
 
-        const [
-          { count: messagesCount },
-          { count: membersCount },
-          { count: devicesCount },
-          { data: telData }
-        ] = await Promise.all([
+        const results = await Promise.all([
           countQuery,
           membersQuery,
           devicesQuery,
           telQuery
         ]);
+        const messagesCount = results[0].count || 0;
+        const membersCount = results[1]?.count || 0;
+        const devicesCount = results[2].count || 0;
+        const telData = results[3].data;
 
         // Calculate total redacted entities sum
         let totalRedacted = 0;
@@ -148,10 +152,10 @@ export default function DashboardOverviewPage() {
         }
 
         setStats({
-          messagesCount: messagesCount || 0,
+          messagesCount: messagesCount,
           piiCount: totalRedacted,
-          membersCount: membersCount || 0,
-          devicesCount: devicesCount || 0,
+          membersCount: membersCount,
+          devicesCount: devicesCount,
         });
 
         // Platform Breakdown (ChatGPT, Claude, Gemini ordered consistently)
@@ -280,7 +284,7 @@ export default function DashboardOverviewPage() {
         </div>
 
         {/* Stats Grid - Flat Clean borderless style */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-6">
+        <div className={`grid grid-cols-2 ${userRole !== "member" ? "md:grid-cols-4" : "md:grid-cols-3"} gap-x-8 gap-y-6`}>
           {/* Stat 1 */}
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Protection Activity</span>
@@ -311,20 +315,22 @@ export default function DashboardOverviewPage() {
             </div>
           </div>
 
-          {/* Stat 3 */}
-          <div className="space-y-1">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Active Members</span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-semibold text-gray-900 font-sans tracking-tight">
-                {loading ? (
-                  <div className="h-7 w-12 bg-gray-100 animate-pulse rounded mt-1" />
-                ) : (
-                  stats.membersCount
-                )}
-              </span>
-              <span className="text-xs text-gray-400 font-medium">seats</span>
+          {/* Stat 3 — Members count: admin/owner only */}
+          {userRole !== "member" && (
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Active Members</span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-semibold text-gray-900 font-sans tracking-tight">
+                  {loading ? (
+                    <div className="h-7 w-12 bg-gray-100 animate-pulse rounded mt-1" />
+                  ) : (
+                    stats.membersCount
+                  )}
+                </span>
+                <span className="text-xs text-gray-400 font-medium">seats</span>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Stat 4 */}
           <div className="space-y-1">
@@ -369,10 +375,15 @@ export default function DashboardOverviewPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                   </div>
-                  <div className="space-y-1 max-w-[280px]">
-                    <h3 className="text-xs font-semibold text-gray-900">All conversations secured</h3>
+                  <div className="space-y-1 max-w-[300px]">
+                    <h3 className="text-xs font-semibold text-gray-900">
+                      {userRole === "member" ? "Your conversations are secured" : "All conversations secured"}
+                    </h3>
                     <p className="text-[11px] text-gray-400 leading-normal">
-                      When members of your workspace chat with generative AI models, real-time protection logs will appear here.
+                      {userRole === "member"
+                        ? "Install the ARKN browser extension and start chatting with ChatGPT, Claude, or Gemini. Your personal protection logs will appear here."
+                        : "When members of your workspace chat with generative AI models, real-time protection logs will appear here."
+                      }
                     </p>
                   </div>
                 </div>

@@ -22,12 +22,16 @@ export default function SettingsPage() {
   useEffect(() => {
     document.title = "ARKN • Settings";
     if (typeof window !== "undefined") {
+      const role = localStorage.getItem("arkn_user_role") || "member";
+      setUserRole(role);
       const params = new URLSearchParams(window.location.search);
       const tabParam = params.get("tab");
-      if (tabParam && ["account", "workspace", "integration", "compliance", "danger"].includes(tabParam)) {
+      const allowedTabs = role !== "member"
+        ? ["account", "workspace", "integration", "compliance", "danger"]
+        : ["account", "integration"];
+      if (tabParam && allowedTabs.includes(tabParam)) {
         setActiveTab(tabParam);
       }
-      setUserRole(localStorage.getItem("arkn_user_role") || "member");
     }
   }, []);
 
@@ -56,6 +60,12 @@ export default function SettingsPage() {
         }
         setOrgId(membership.organization_id);
         setUserRole(membership.role || "member");
+
+        // If the loaded role says member, redirect away from admin-only tabs
+        const role = membership.role || "member";
+        if (role === "member" && restrictedTabs.includes(activeTab)) {
+          setActiveTab("account");
+        }
 
         const { data: org, error: orgError } = await supabase
           .from("organizations")
@@ -162,12 +172,13 @@ export default function SettingsPage() {
   const integrationKey = orgId ? `arkn_live_${orgId.replace(/-/g, "")}` : "Loading API credentials...";
   const isAdmin = userRole !== "member";
 
+  const restrictedTabs = ["workspace", "compliance", "danger"];
   const tabs = [
     { id: "account", label: "Account settings" },
-    { id: "workspace", label: "Workspace Profile" },
+    ...(userRole !== "member" ? [{ id: "workspace", label: "Workspace Profile" as const }] : []),
     { id: "integration", label: "Browser Integration" },
-    { id: "compliance", label: "Compliance & Security" },
-    { id: "danger", label: "Danger Zone" },
+    ...(userRole !== "member" ? [{ id: "compliance", label: "Compliance & Security" as const }] : []),
+    ...(userRole !== "member" ? [{ id: "danger", label: "Danger Zone" as const }] : []),
   ];
 
   return (

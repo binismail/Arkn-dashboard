@@ -28,6 +28,7 @@ export default function Shell({ children }: ShellProps) {
   const [userName, setUserName] = useState("User");
   const [userEmail, setUserEmail] = useState("");
   const [userInitials, setUserInitials] = useState("U");
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -83,6 +84,7 @@ export default function Shell({ children }: ShellProps) {
 
         if (!memError && membership) {
           const role = membership.role || "member";
+          setUserRole(role);
           localStorage.setItem("arkn_user_role", role);
 
           const org = (membership as any).organizations;
@@ -90,6 +92,9 @@ export default function Shell({ children }: ShellProps) {
             setOrgName(org.name);
             localStorage.setItem("arkn_org_name", org.name);
           }
+        } else if (memError) {
+          // No membership found — likely a member who hasn't been set up yet
+          setUserRole(localStorage.getItem("arkn_user_role") || "member");
         }
       } catch (err) {
         console.error("Error loading shell session:", err);
@@ -103,11 +108,13 @@ export default function Shell({ children }: ShellProps) {
     setTimeout(() => setToastMessage(""), 4000);
   };
 
+  const isAdmin = userRole && ["owner", "admin"].includes(userRole);
+
   const navigation = [
     { name: "Overview", href: "/dashboard", icon: LayoutDashboardIcon },
-    { name: "Members", href: "/dashboard/members", icon: UsersIcon },
+    ...(isAdmin ? [{ name: "Members", href: "/dashboard/members", icon: UsersIcon }] : []),
     { name: "Devices", href: "/dashboard/devices", icon: LaptopIcon },
-    { name: "Policies", href: "/dashboard/policies", icon: ToggleLeftIcon },
+    ...(isAdmin ? [{ name: "Policies", href: "/dashboard/policies", icon: ToggleLeftIcon }] : []),
     { name: "Reports", href: "/dashboard/reports", icon: FileTextIcon },
     { name: "Settings", href: "/dashboard/settings", icon: SettingsIcon },
   ];
