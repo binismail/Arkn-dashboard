@@ -75,15 +75,38 @@ export default function MembersPage() {
           .eq("organization_id", membership.organization_id)
           .eq("status", "pending");
 
+        // Fetch profiles for all member user_ids to resolve real names
+        let profileMap: Record<string, { full_name: string; email: string }> = {};
+        if (!dbMemError && dbMembers) {
+          const memberIds = dbMembers.map((m) => m.user_id);
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("id, full_name, email")
+            .in("id", memberIds);
+
+          if (profiles) {
+            profiles.forEach((p: any) => {
+              profileMap[p.id] = { full_name: p.full_name || "Unknown", email: p.email || "" };
+            });
+          }
+        }
+
         const loadedTeam: TeamMember[] = [];
 
         if (!dbMemError && dbMembers) {
           dbMembers.forEach((m) => {
             const isSelf = m.user_id === user.id;
+            const profile = profileMap[m.user_id];
+            const displayName = isSelf
+              ? (user.user_metadata?.full_name || profile?.full_name || "You")
+              : (profile?.full_name || `User (${m.user_id.slice(0, 5)})`);
+            const displayEmail = isSelf
+              ? (user.email || profile?.email || "")
+              : (profile?.email || "Enterprise Member");
             loadedTeam.push({
               id: m.id,
-              name: isSelf ? (user.user_metadata?.full_name || "You") : `User (${m.user_id.slice(0, 5)})`,
-              email: isSelf ? user.email || "" : "Enterprise Member",
+              name: displayName,
+              email: displayEmail,
               role: m.role,
               status: "active",
               joined: new Date(m.created_at).toLocaleDateString("en-US", {

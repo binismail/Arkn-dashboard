@@ -61,6 +61,17 @@ export default function DevicesPage() {
         }
 
         if (dbDevices) {
+          // Resolve user names from profiles
+          const deviceUserIds = [...new Set(dbDevices.map((d) => d.user_id).filter(Boolean))];
+          const { data: deviceProfiles } = await supabase
+            .from("profiles")
+            .select("id, full_name")
+            .in("id", deviceUserIds);
+          const nameMap: Record<string, string> = {};
+          if (deviceProfiles) {
+            deviceProfiles.forEach((p: any) => { nameMap[p.id] = p.full_name; });
+          }
+
           const mappedDevices: Device[] = dbDevices.map((d) => {
             const lastSeenDate = new Date(d.last_seen_at);
             const diffMs = Date.now() - lastSeenDate.getTime();
@@ -80,10 +91,11 @@ export default function DevicesPage() {
               }
             }
 
+            const uid = d.user_id;
             return {
               id: d.id,
               name: d.device_name || "Unknown Browser Install",
-              user: d.user_id === user.id ? (user.user_metadata?.full_name || "You") : `User (${d.user_id.slice(0, 5)})`,
+              user: uid === user.id ? (user.user_metadata?.full_name || "You") : (nameMap[uid] || `User (${d.user_id.slice(0, 5)})`),
               browser: d.browser || "Unknown Browser",
               os: d.os || "Unknown OS",
               version: d.extension_version || "0.1.0",

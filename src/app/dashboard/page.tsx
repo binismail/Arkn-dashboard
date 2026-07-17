@@ -44,7 +44,7 @@ export default function DashboardOverviewPage() {
 
         const { data: membership, error: memError } = await supabase
           .from("memberships")
-          .select("organization_id")
+          .select("organization_id, role")
           .eq("user_id", user.id)
           .maybeSingle();
 
@@ -53,6 +53,7 @@ export default function DashboardOverviewPage() {
           return;
         }
         const orgId = membership.organization_id;
+        const userRole = membership.role || "member";
 
         // Fetch org profile
         const { data: orgData } = await supabase
@@ -76,8 +77,23 @@ export default function DashboardOverviewPage() {
           startDateStr = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
         }
 
+        // Scope: members see only their own telemetry, owners/admins see all
         let telQuery = supabase.from("telemetry").select("pii_counts, platform, event_at, devices(device_name, user_id)").eq("organization_id", orgId);
         let countQuery = supabase.from("telemetry").select("*", { count: "exact", head: true }).eq("organization_id", orgId);
+
+        if (userRole === "member") {
+          const { data: myDevices } = await supabase
+            .from("devices")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("organization_id", orgId);
+
+          const deviceIds = (myDevices || []).map((d) => d.id);
+          if (deviceIds.length > 0) {
+            telQuery = telQuery.in("device_id", deviceIds);
+            countQuery = countQuery.in("device_id", deviceIds);
+          }
+        }
 
         if (startDateStr) {
           telQuery = telQuery.gte("event_at", startDateStr);
@@ -85,6 +101,21 @@ export default function DashboardOverviewPage() {
         }
 
         // Fetch totals
+        let membersQuery = supabase
+          .from("memberships")
+          .select("*", { count: "exact", head: true })
+          .eq("organization_id", orgId);
+
+        let devicesQuery = supabase
+          .from("devices")
+          .select("*", { count: "exact", head: true })
+          .eq("organization_id", orgId);
+
+        // Members see their own device count, not org-wide
+        if (userRole === "member") {
+          devicesQuery = devicesQuery.eq("user_id", user.id);
+        }
+
         const [
           { count: messagesCount },
           { count: membersCount },
@@ -92,8 +123,8 @@ export default function DashboardOverviewPage() {
           { data: telData }
         ] = await Promise.all([
           countQuery,
-          supabase.from("memberships").select("*", { count: "exact", head: true }).eq("organization_id", orgId),
-          supabase.from("devices").select("*", { count: "exact", head: true }).eq("organization_id", orgId),
+          membersQuery,
+          devicesQuery,
           telQuery
         ]);
 
@@ -146,6 +177,17 @@ export default function DashboardOverviewPage() {
 
         // Fetch recent activities
         if (telData) {
+          // Collect unique user_ids from telemetry to resolve names
+          const userIds = [...new Set(telData.map((t: any) => t.devices?.user_id).filter(Boolean))];
+          const { data: userProfiles } = await supabase
+            .from("profiles")
+            .select("id, full_name")
+            .in("id", userIds);
+          const nameMap: Record<string, string> = {};
+          if (userProfiles) {
+            userProfiles.forEach((p: any) => { nameMap[p.id] = p.full_name; });
+          }
+
           const sorted = [...telData]
             .sort((a, b) => new Date(b.event_at).getTime() - new Date(a.event_at).getTime())
             .slice(0, 5);
@@ -165,7 +207,10 @@ export default function DashboardOverviewPage() {
             }
 
             const device = activity.devices || {};
-            const userStr = device.user_id === user.id ? "You" : `User (${String(device.user_id || "Unregistered").slice(0, 5)})`;
+            const uid = device.user_id;
+            const userStr = uid === user.id
+              ? "You"
+              : (nameMap[uid] || `User (${String(uid || "Unregistered").slice(0, 5)})`);
 
             return {
               id: String(index),

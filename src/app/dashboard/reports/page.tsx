@@ -36,7 +36,7 @@ export default function ReportsPage() {
 
         const { data: membership, error: memError } = await supabase
           .from("memberships")
-          .select("organization_id")
+          .select("organization_id, role")
           .eq("user_id", user.id)
           .maybeSingle();
 
@@ -44,8 +44,10 @@ export default function ReportsPage() {
           setLoading(false);
           return;
         }
+        const userRole = membership.role || "member";
 
-        const { data: telemetry, error: telError } = await supabase
+        // Scope: members see only their own reports, admins/owners see all
+        let telQuery = supabase
           .from("telemetry")
           .select(`
             id,
@@ -60,6 +62,21 @@ export default function ReportsPage() {
           .eq("organization_id", membership.organization_id)
           .order("event_at", { ascending: false });
 
+        if (userRole === "member") {
+          const { data: myDevices } = await supabase
+            .from("devices")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("organization_id", membership.organization_id);
+
+          const deviceIds = (myDevices || []).map((d) => d.id);
+          if (deviceIds.length > 0) {
+            telQuery = telQuery.in("device_id", deviceIds);
+          }
+        }
+
+        const { data: telemetry, error: telError } = await telQuery;
+
         if (telError) {
           console.error("Error fetching telemetry:", telError);
           setLoading(false);
@@ -67,10 +84,23 @@ export default function ReportsPage() {
         }
 
         if (telemetry) {
+          // Resolve user names from profiles for all unique user_ids
+          const userIds = [...new Set(telemetry.map((t: any) => t.devices?.user_id).filter(Boolean))];
+          const { data: userProfiles } = await supabase
+            .from("profiles")
+            .select("id, full_name")
+            .in("id", userIds);
+          const nameMap: Record<string, string> = {};
+          if (userProfiles) {
+            userProfiles.forEach((p: any) => { nameMap[p.id] = p.full_name; });
+          }
+
           const mapped = telemetry.map((t: any) => {
             const device = t.devices || {};
-            const isSelf = device.user_id === user.id;
-            const deviceOwner = isSelf ? (user.user_metadata?.full_name || "You") : `User (${String(device.user_id || "Unregistered").slice(0, 5)})`;
+            const uid = device.user_id;
+            const deviceOwner = uid === user.id
+              ? (user.user_metadata?.full_name || "You")
+              : (nameMap[uid] || `User (${String(uid || "Unregistered").slice(0, 5)})`);
             
             const counts = t.pii_counts || {};
             const emailCount = Number(counts.EMAIL || 0);
