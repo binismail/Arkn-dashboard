@@ -38,19 +38,27 @@ export default function CreateOrgPage() {
           return;
         }
 
-        // Invitation found: auto-create membership
-        const { error: memError } = await supabase
+        // Invitation found: check if membership already exists
+        const { data: existingMembership } = await supabase
           .from("memberships")
-          .insert({
-            user_id: user.id,
-            organization_id: invite.organization_id,
-            role: invite.role || "member",
-          });
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
 
-        if (memError) {
-          console.error("Auto-membership creation failed:", memError.message);
-          setCheckingInvite(false);
-          return;
+        if (!existingMembership) {
+          const { error: memError } = await supabase
+            .from("memberships")
+            .insert({
+              user_id: user.id,
+              organization_id: invite.organization_id,
+              role: invite.role || "member",
+            });
+
+          if (memError) {
+            console.error("Auto-membership creation failed:", memError.message);
+            setCheckingInvite(false);
+            return;
+          }
         }
 
         // Mark the invitation as accepted

@@ -104,42 +104,44 @@ export default function ResetPasswordPage() {
             .maybeSingle();
 
           if (invite) {
-            // Insert membership
+            // Check if membership already exists for this user
+            const { data: existingMembership } = await supabase
+              .from("memberships")
+              .select("id")
+              .eq("user_id", user.id)
+              .maybeSingle();
 
-            console.log({
-              authUid: user.id,
-              orgId: invite.organization_id,
-              role: invite.role,
-            });
-
-           const { data, error } = await supabase
+            if (!existingMembership) {
+              // Insert membership
+              const { error: memError } = await supabase
                 .from("memberships")
                 .insert({
                   user_id: user.id,
                   organization_id: invite.organization_id,
                   role: invite.role || "member",
-                })
-                .select();
+                });
 
-              console.log("Membership Insert");
-              console.log(data);
-              console.log(error);
+              if (memError) {
+                console.error("Membership insert failed:", memError.message);
+                setError("Failed to set up your workspace membership. Please contact your admin.");
+                setLoading(false);
+                return;
+              }
+            }
+
             // Mark invitation accepted
-           const {error:newError} = await supabase
+            await supabase
               .from("invitations")
               .update({ status: "accepted" })
               .eq("id", invite.id);
-
-            console.log("Invitation Update");
-            console.log(newError);
           }
         }
 
         setMessage("Account setup complete! Redirecting...");
         setLoading(false);
-        // setTimeout(() => {
-        //   window.location.href = "/dashboard";
-        // }, 1500);
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 1500);
       } else {
         // Normal reset flow: sign out of recovery session and redirect to login
         await supabase.auth.signOut();

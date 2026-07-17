@@ -99,10 +99,15 @@ export async function POST(request: Request) {
         continue;
       }
 
-      // Generate a secure invite link (bypasses default email template sending)
+      // Ensure the user exists in Supabase Auth without creating a duplicate
+      // Using `type=signup` instead of `type=invite` because `type=invite`
+      // always creates a brand-new auth user, even if one already exists for
+      // this email. `type=signup` signs in existing users instead of duplicating them.
+      const tempPassword = crypto.randomUUID();
       const { data: inviteLinkData, error: inviteLinkError } = await supabaseAdmin.auth.admin.generateLink({
-        type: "invite",
+        type: "signup",
         email: trimmedEmail,
+        password: tempPassword,
       });
 
       if (inviteLinkError || !inviteLinkData?.properties?.hashed_token) {
@@ -111,7 +116,7 @@ export async function POST(request: Request) {
         continue;
       }
 
-      const inviteLink = `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback?token_hash=${inviteLinkData.properties.hashed_token}&type=invite&next=/reset-password`;
+      const inviteLink = `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback?token_hash=${inviteLinkData.properties.hashed_token}&type=signup&next=/reset-password`;
 
       // Send the beautifully designed custom HTML email via Resend
       try {
