@@ -35,7 +35,16 @@ create trigger on_auth_user_created
     execute function public.handle_new_user();
 
 -- ── 2. RLS for PROFILES ─────────────────────────────────────────────────────
-alter table public.profiles enable row_level_security;
+do $$
+begin
+    if not exists (
+        select 1 from pg_tables
+        where tablename = 'profiles'
+          and rowsecurity = true
+    ) then
+        alter table public.profiles enable row_level_security;
+    end if;
+end $$;
 
 -- Users can view profiles of members in their organisation
 create policy "Users can view profiles in their organisation"
