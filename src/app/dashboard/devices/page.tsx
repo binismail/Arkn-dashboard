@@ -39,7 +39,7 @@ export default function DevicesPage() {
 
         const { data: membership, error: memError } = await supabase
           .from("memberships")
-          .select("organization_id")
+          .select("organization_id, role")
           .eq("user_id", user.id)
           .maybeSingle();
 
@@ -48,11 +48,19 @@ export default function DevicesPage() {
           return;
         }
         setOrgId(membership.organization_id);
+        const role = membership.role || "member";
 
-        const { data: dbDevices, error: devError } = await supabase
+        let devicesQuery = supabase
           .from("devices")
           .select("id, device_name, browser, os, extension_version, last_seen_at, user_id")
           .eq("organization_id", membership.organization_id);
+
+        // Members see only their own devices
+        if (role === "member") {
+          devicesQuery = devicesQuery.eq("user_id", user.id);
+        }
+
+        const { data: dbDevices, error: devError } = await devicesQuery;
 
         if (devError) {
           console.error("Error fetching devices:", devError);
@@ -140,7 +148,7 @@ export default function DevicesPage() {
   };
 
   return (
-    <Shell>
+    <>
       <div className="space-y-8 animate-fade-in max-w-6xl font-sans">
         {/* Title */}
         <div className="flex justify-between items-end border-b border-gray-100 pb-5">
@@ -305,6 +313,6 @@ export default function DevicesPage() {
         </div>,
         document.body
       )}
-    </Shell>
+    </>
   );
 }

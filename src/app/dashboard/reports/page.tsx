@@ -188,7 +188,6 @@ export default function ReportsPage() {
     : records.filter(r => String(r.platform).toLowerCase() === platformFilter);
 
   return (
-    <Shell>
       <div className="space-y-8 animate-fade-in max-w-6xl font-sans">
         {/* Title */}
         <div className="flex justify-between items-end border-b border-gray-100 pb-5">
@@ -336,6 +335,5 @@ export default function ReportsPage() {
           </div>
         </div>
       </div>
-    </Shell>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Shell from "@/components/layout/Shell";
 import { createClient } from "@/utils/supabase/client";
 
 export default function SettingsPage() {
@@ -182,7 +181,6 @@ export default function SettingsPage() {
   ];
 
   return (
-    <Shell>
       <div className="space-y-8 animate-fade-in max-w-6xl font-sans">
         {/* Title */}
         <div className="flex justify-between items-end border-b border-gray-100 pb-5">
@@ -460,6 +458,6 @@ export default function SettingsPage() {
           )}
         </div>
       </div>
-    </Shell>
   );
 }
+

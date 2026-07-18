@@ -30,6 +30,7 @@ export default function Shell({ children }: ShellProps) {
   const [userInitials, setUserInitials] = useState("U");
   const [userRole, setUserRole] = useState<string | null>(null);
 
+  const [roleLoaded, setRoleLoaded] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -96,6 +97,7 @@ export default function Shell({ children }: ShellProps) {
           // No membership found — likely a member who hasn't been set up yet
           setUserRole(localStorage.getItem("arkn_user_role") || "member");
         }
+        setRoleLoaded(true);
       } catch (err) {
         console.error("Error loading shell session:", err);
       }
@@ -151,27 +153,40 @@ export default function Shell({ children }: ShellProps) {
 
           {/* Nav Items */}
           <nav className="p-3 space-y-1">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-gray-50 text-gray-900 font-semibold"
-                      : "text-gray-500 hover:bg-gray-50/50 hover:text-gray-900"
-                  }`}
+            {!roleLoaded ? (
+              /* Neutral skeleton nav — no flash to member view while role loads */
+              Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 px-3 py-2 rounded-md animate-pulse"
                 >
-                  <Icon
-                    size={16}
-                    className={isActive ? "text-[#1A5C38]" : "text-gray-400"}
-                  />
-                  {item.name}
-                </Link>
-              );
-            })}
+                  <div className="w-4 h-4 bg-gray-200 rounded shrink-0" />
+                  <div className="h-3.5 w-24 bg-gray-200 rounded" />
+                </div>
+              ))
+            ) : (
+              navigation.map((item) => {
+                const isActive = pathname === item.href;
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-gray-50 text-gray-900 font-semibold"
+                        : "text-gray-500 hover:bg-gray-50/50 hover:text-gray-900"
+                    }`}
+                  >
+                    <Icon
+                      size={16}
+                      className={isActive ? "text-[#1A5C38]" : "text-gray-400"}
+                    />
+                    {item.name}
+                  </Link>
+                );
+              })
+            )}
           </nav>
         </div>
 

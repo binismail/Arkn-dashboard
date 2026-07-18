@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Shell from "@/components/layout/Shell";
 import { CheckIcon, PlusIcon } from "@/components/ui/icons";
 import { createClient } from "@/utils/supabase/client";
 import { createPortal } from "react-dom";
@@ -153,8 +152,7 @@ export default function PoliciesPage() {
   const isAdmin = userRole !== "member";
 
   return (
-    <Shell>
-      <div className="space-y-8 animate-fade-in max-w-6xl font-sans">
+    <div className="space-y-8 animate-fade-in max-w-6xl font-sans">
         {/* Header Block */}
         <div className="flex justify-between items-end border-b border-gray-100 pb-5">
           <div className="space-y-1">
@@ -342,7 +340,6 @@ export default function PoliciesPage() {
           </div>
         </div>
       </div>
-    </Shell>
   );
 }
 
@@ -453,6 +450,7 @@ function CustomRulesSection({ orgId, pageLoading, userRole, rules, setRules, has
   const isAdmin = userRole !== "member";
 
   return (
+    <div>
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div>
@@ -604,6 +602,7 @@ function CustomRulesSection({ orgId, pageLoading, userRole, rules, setRules, has
         </div>,
         document.body
       )}
+    </div>
     </div>
   );
 }

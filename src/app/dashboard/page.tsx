@@ -250,7 +250,6 @@ export default function DashboardOverviewPage() {
   const platformList = platforms.length > 0 ? platforms : defaultPlatforms;
 
   return (
-    <Shell>
       <div className="space-y-12 animate-fade-in max-w-6xl font-sans">
         {/* Header Block */}
         <div className="flex justify-between items-end border-b border-gray-100 pb-5">
@@ -496,6 +495,5 @@ export default function DashboardOverviewPage() {
           </div>
         </div>
       </div>
-    </Shell>
   );
 }
