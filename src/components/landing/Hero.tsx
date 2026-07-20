@@ -26,7 +26,7 @@ export default function Hero() {
   const currentPlatform = PLATFORMS[currentIndex];
 
   return (
-    <section className="pt-38 pb-24 px-6 overflow-hidden bg-white font-sans">
+    <section className="pt-32 sm:pt-38 pb-20 sm:pb-24 px-4 sm:px-6 overflow-hidden bg-white font-sans">
       <div className="max-w-4xl mx-auto text-center">
         
         {/* Works with Platform Switcher Badge */}
@@ -70,7 +70,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="text-[40px] md:text-[48px] font-semibold text-gray-950 tracking-[-0.03em] leading-[1.08]"
+          className="text-[34px] sm:text-[42px] md:text-[48px] font-semibold text-gray-950 tracking-[-0.03em] leading-[1.1]"
         >
           Your team's security layer for AI.
         </motion.h1>
@@ -80,36 +80,36 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-5 text-[15px] md:text-[17px] text-gray-500 leading-relaxed max-w-2xl mx-auto"
+          className="mt-4 sm:mt-5 text-[15px] md:text-[17px] text-gray-500 leading-relaxed max-w-2xl mx-auto"
         >
           ARKN sits between your team and ChatGPT, Claude, and Gemini, automatically detecting and replacing sensitive information before it leaves the browser—without storing your prompts or interrupting how your team works.
         </motion.p>
 
-        {/* Auth-Aware CTA Buttons */}
+        {/* Auth-Aware CTA Buttons (Mobile Responsive Stack) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-8 flex items-center justify-center gap-3"
+          className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full sm:w-auto max-w-xs sm:max-w-none mx-auto"
         >
           {isLoggedIn ? (
             <Link
               href="/dashboard"
-              className="h-10 px-5 bg-[#1A5C38] hover:bg-[#113f25] text-white text-[13px] font-semibold rounded-lg flex items-center justify-center transition-colors"
+              className="h-11 px-5 bg-[#1A5C38] hover:bg-[#113f25] text-white text-[14px] font-semibold rounded-lg flex items-center justify-center transition-colors whitespace-nowrap w-full sm:w-auto"
             >
               Go to Dashboard &rarr;
             </Link>
           ) : (
             <Link
               href="/register"
-              className="h-10 px-5 bg-[#1A5C38] hover:bg-[#113f25] text-white text-[13px] font-semibold rounded-lg flex items-center justify-center transition-colors"
+              className="h-11 px-5 bg-[#1A5C38] hover:bg-[#113f25] text-white text-[14px] font-semibold rounded-lg flex items-center justify-center transition-colors whitespace-nowrap w-full sm:w-auto"
             >
               Create workspace
             </Link>
           )}
           <a
             href="#onboarding"
-            className="h-10 px-5 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 text-[13px] font-semibold rounded-lg flex items-center justify-center transition-colors"
+            className="h-11 px-5 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 text-[14px] font-semibold rounded-lg flex items-center justify-center transition-colors whitespace-nowrap w-full sm:w-auto"
           >
             Download extension
           </a>
