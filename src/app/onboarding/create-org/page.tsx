@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircleIcon } from "@/components/ui/icons";
 import { createClient } from "@/utils/supabase/client";
+import ArknLogo from "@/components/ui/ArknLogo";
 
 export default function CreateOrgPage() {
   const router = useRouter();
@@ -172,7 +173,7 @@ export default function CreateOrgPage() {
     return (
       <div className="min-h-screen bg-white flex flex-col justify-center items-center py-12 px-6 lg:px-8 font-sans">
         <div className="flex flex-col items-center space-y-4">
-          <span className="text-[10px] font-bold tracking-widest text-[#1A5C38] uppercase bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-sm">ARKN</span>
+          <ArknLogo size={32} />
           <div className="flex items-center gap-2 text-xs text-gray-400">
             <svg className="animate-spin h-3.5 w-3.5 text-[#1A5C38]" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -190,7 +191,7 @@ export default function CreateOrgPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md space-y-6">
         {/* Brand wordmark logo */}
         <div className="flex justify-center">
-          <span className="text-xs font-semibold tracking-widest text-[#1A5C38] uppercase">ARKN</span>
+          <ArknLogo size={32} />
         </div>
 
         <div className="text-center">

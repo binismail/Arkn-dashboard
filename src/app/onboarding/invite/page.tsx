@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PlusIcon } from "@/components/ui/icons";
 import { createClient } from "@/utils/supabase/client";
+import ArknLogo from "@/components/ui/ArknLogo";
 
 export default function InvitePage() {
   const router = useRouter();
@@ -85,7 +86,7 @@ export default function InvitePage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md space-y-6">
         {/* Brand wordmark logo */}
         <div className="flex justify-center">
-          <span className="text-xs font-semibold tracking-widest text-[#1A5C38] uppercase">ARKN</span>
+          <ArknLogo size={32} />
         </div>
 
         <div className="text-center">

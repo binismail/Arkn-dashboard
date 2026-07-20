@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { AlertCircleIcon, CheckIcon } from "@/components/ui/icons";
 import { createClient } from "@/utils/supabase/client";
+import ArknLogo from "@/components/ui/ArknLogo";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -61,7 +62,9 @@ export default function RegisterPage() {
       <div className="min-h-screen bg-white flex flex-col justify-center py-12 px-6 lg:px-8 animate-fade-in font-sans">
         <div className="sm:mx-auto sm:w-full sm:max-w-md space-y-6 text-center">
           <div className="flex justify-center">
-            <span className="text-[10px] font-bold tracking-widest text-[#1A5C38] uppercase bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-sm">ARKN</span>
+            <Link href="/">
+              <ArknLogo size={32} />
+            </Link>
           </div>
 
           <div className="inline-flex w-10 h-10 rounded-full bg-green-50 border border-green-100 items-center justify-center text-[#1A5C38]">
@@ -88,7 +91,9 @@ export default function RegisterPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md space-y-5">
         {/* Brand wordmark logo */}
         <div className="flex justify-center">
-          <span className="text-[10px] font-bold tracking-widest text-[#1A5C38] uppercase bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-sm">ARKN</span>
+          <Link href="/">
+            <ArknLogo size={32} />
+          </Link>
         </div>
 
         <div className="text-center space-y-1">

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { AlertCircleIcon } from "@/components/ui/icons";
 import { createClient } from "@/utils/supabase/client";
+import ArknLogo from "@/components/ui/ArknLogo";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -51,7 +52,9 @@ export default function ForgotPasswordPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md space-y-5">
         {/* Brand wordmark logo */}
         <div className="flex justify-center">
-          <span className="text-[10px] font-bold tracking-widest text-[#1A5C38] uppercase bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-sm">ARKN</span>
+          <Link href="/">
+            <ArknLogo size={32} />
+          </Link>
         </div>
         
         <div className="text-center space-y-1">
