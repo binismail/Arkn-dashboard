@@ -18,14 +18,22 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+const defaultAppUrl = process.env.NEXT_PUBLIC_APP_URL
+  ? process.env.NEXT_PUBLIC_APP_URL
+  : process.env.RAILWAY_PUBLIC_DOMAIN
+  ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
+  : process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL}`
+  : "https://arkn.up.railway.app";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://myarkn.ai"),
+  metadataBase: new URL(defaultAppUrl),
   title: {
     default: "ARKN • Your team's security layer for AI",
     template: "%s • ARKN",
   },
   description:
-    "ARKN is a browser-first security layer for AI. Automatically detect, redact, and tokenize sensitive PII, API keys, financial data, and clinical records locally before prompts reach ChatGPT, Claude, or Gemini.",
+    "Browser-first AI security layer. Automatically redact sensitive PII and secrets before prompts reach ChatGPT, Claude, or Gemini.",
   applicationName: "ARKN",
   authors: [{ name: "MYARKN LTD", url: "https://myarkn.ai" }],
   generator: "Next.js",
@@ -36,9 +44,7 @@ export const metadata: Metadata = {
     "ChatGPT Security",
     "Claude Privacy",
     "Gemini Data Shield",
-    "Browser AI Interceptor",
     "Zero Trust AI",
-    "Data Loss Prevention",
     "DLP for AI",
   ],
   icons: {
@@ -51,17 +57,26 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://myarkn.ai",
+    url: defaultAppUrl,
     title: "ARKN • Your team's security layer for AI",
     description:
-      "Browser-first AI security layer. Automatically redact PII, secrets, and sensitive business records before they reach ChatGPT, Claude, or Gemini.",
+      "Browser-first AI security layer. Automatically redact PII & secrets before prompts reach ChatGPT, Claude, or Gemini.",
     siteName: "ARKN",
+    images: [
+      {
+        url: `${defaultAppUrl}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: "ARKN • Your team's security layer for AI",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "ARKN • Your team's security layer for AI",
     description:
-      "Protect customer data, credentials, and sensitive records before they reach ChatGPT, Claude, or Gemini.",
+      "Browser-first AI security layer. Automatically redact PII & secrets before prompts reach ChatGPT, Claude, or Gemini.",
+    images: [`${defaultAppUrl}/og-image.png`],
     creator: "@myarkn_ai",
   },
   robots: {
@@ -82,7 +97,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Schema.org JSON-LD Structured Data for AIEO (AI Engine Optimization)
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
