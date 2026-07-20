@@ -53,6 +53,7 @@ export default function Hero() {
                     src={currentPlatform.logo}
                     alt={currentPlatform.name}
                     fill
+                    sizes="16px"
                     className="object-contain"
                   />
                 </div>
