@@ -30,18 +30,18 @@ export default function Navigation() {
 
         {/* Navigation Links (Desktop) */}
         <div className="hidden md:flex items-center gap-8">
-          <a href="#why-arkn" className="text-[13px] font-medium text-gray-500 hover:text-gray-900 transition-colors">
+          <Link href="/#why-arkn" className="text-[13px] font-medium text-gray-500 hover:text-gray-900 transition-colors">
             Why ARKN
-          </a>
-          <a href="#onboarding" className="text-[13px] font-medium text-gray-500 hover:text-gray-900 transition-colors">
+          </Link>
+          <Link href="/#onboarding" className="text-[13px] font-medium text-gray-500 hover:text-gray-900 transition-colors">
             How it works
-          </a>
-          <a href="#policies" className="text-[13px] font-medium text-gray-500 hover:text-gray-900 transition-colors">
+          </Link>
+          <Link href="/#policies" className="text-[13px] font-medium text-gray-500 hover:text-gray-900 transition-colors">
             Protection Rules
-          </a>
-          <a href="#trust" className="text-[13px] font-medium text-gray-500 hover:text-gray-900 transition-colors">
+          </Link>
+          <Link href="/#trust" className="text-[13px] font-medium text-gray-500 hover:text-gray-900 transition-colors">
             Security
-          </a>
+          </Link>
         </div>
 
         {/* Auth-Aware Action Buttons (Mobile Optimized) */}

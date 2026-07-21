@@ -182,6 +182,13 @@ export default function RegisterPage() {
             )}
             {loading ? "Creating workspace..." : "Continue"}
           </button>
+
+          <p className="text-[11px] text-gray-400 text-center leading-normal pt-1">
+            By creating a workspace, you agree to our{" "}
+            <Link href="/privacy" className="text-gray-600 hover:text-gray-900 underline font-medium">
+              Privacy Policy
+            </Link>.
+          </p>
         </form>
 
         <div className="mt-6 text-center text-xs text-gray-400 border-t border-gray-100 pt-4">
