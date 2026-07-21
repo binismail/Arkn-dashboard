@@ -49,10 +49,15 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 2: Compliance */}
+          {/* Column 2: Compliance & Legal */}
           <div className="space-y-3">
             <h4 className="text-xs font-semibold text-gray-950 uppercase tracking-wider font-mono">Compliance</h4>
             <ul className="space-y-2 text-xs">
+              <li>
+                <Link href="/privacy" className="hover:text-gray-950 transition-colors text-gray-700 font-medium">
+                  Privacy Policy
+                </Link>
+              </li>
               <li><span className="text-gray-500">GDPR Compliance</span></li>
               <li><span className="text-gray-500">SOC2 Type II Ready</span></li>
               <li><span className="text-gray-500">UK Data Protection</span></li>
@@ -95,7 +100,13 @@ export default function Footer() {
 
         {/* Bottom Copyright Bar */}
         <div className="border-t border-gray-100 pt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-[12px] text-gray-400">
-          <p>© {new Date().getFullYear()} MYARKN LTD. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            <p>© {new Date().getFullYear()} MYARKN LTD. All rights reserved.</p>
+            <span>•</span>
+            <Link href="/privacy" className="hover:text-gray-600 transition-colors">
+              Privacy Policy
+            </Link>
+          </div>
           <div className="text-right space-y-0.5 text-[11px] text-gray-500 font-medium leading-tight">
             <p>Only anonymized protection metadata is stored.</p>
             <p className="text-gray-400">Never your prompts. Never your raw data.</p>
